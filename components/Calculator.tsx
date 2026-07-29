@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import CalculatorButton from './CalculatorButton';
 import CalculatorDisplay from './CalculatorDisplay';
@@ -11,9 +13,15 @@ const Calculator: React.FC = () => {
       setDisplayValue('0');
     } else if (label === '=') {
       try {
-        const result = evaluate(displayValue);
-        setDisplayValue(String(result));
-      } catch {
+        // Improved regex to handle negative numbers, spaces, multiple operators, and parentheses
+        if (/^[-+]?\d+(\.\d+)?([\s]*[+\-*/][\s]*[-+]?\d+(\.\d+)?|\([\s]*[-+]?\d+(\.\d+)?[\s]*\))*$/.test(displayValue)) {
+          const result = evaluate(displayValue);
+          setDisplayValue(String(result));
+        } else {
+          setDisplayValue('Error');
+        }
+      } catch (error) {
+        console.error('Evaluation error:', error);
         setDisplayValue('Error');
       }
     } else {
