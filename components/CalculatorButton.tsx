@@ -7,7 +7,7 @@ interface CalculatorButtonProps {
 
 const CalculatorButton: React.FC<CalculatorButtonProps> = ({ label, onClick }) => {
   return (
-    <button className="calculator-button" onClick={onClick}>
+    <button onClick={onClick} className="calculator-button">
       {label}
     </button>
   );
