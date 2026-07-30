@@ -1,16 +1,30 @@
-export type Operation = 'add' | 'subtract' | 'multiply' | 'divide';
-
-export function performOperation(a: number, b: number, operation: Operation): number {
-  switch (operation) {
-    case 'add':
-      return a + b;
-    case 'subtract':
-      return a - b;
-    case 'multiply':
-      return a * b;
-    case 'divide':
-      return a / b;
-    default:
-      throw new Error('Invalid operation');
-  }
+export interface TodoItem {
+  id: string;
+  title: string;
+  completed: boolean;
 }
+
+export const mockTodoData: TodoItem[] = [
+  { id: '1', title: 'Learn TypeScript', completed: false },
+  { id: '2', title: 'Build a Todo App', completed: false },
+  { id: '3', title: 'Test the App', completed: false }
+];
+
+export const addTodo = (todos: TodoItem[], title: string): TodoItem[] => {
+  const newTodo: TodoItem = {
+    id: (todos.length + 1).toString(),
+    title,
+    completed: false
+  };
+  return [...todos, newTodo];
+};
+
+export const toggleTodo = (todos: TodoItem[], id: string): TodoItem[] => {
+  return todos.map(todo =>
+    todo.id === id ? { ...todo, completed: !todo.completed } : todo
+  );
+};
+
+export const removeTodo = (todos: TodoItem[], id: string): TodoItem[] => {
+  return todos.filter(todo => todo.id !== id);
+};
