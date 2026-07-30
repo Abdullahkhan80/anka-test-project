@@ -1,32 +1,67 @@
-"use client";
-
 import React, { useState } from 'react';
-import CalculatorButton from './CalculatorButton';
-import CalculatorDisplay from './CalculatorDisplay';
-import { evaluate } from 'mathjs';
+import { create, all } from 'mathjs';
+
+const math = create(all);
+
+export const CalculatorButton: React.FC<{ label: string; onClick: () => void }> = ({ label, onClick }) => (
+  <button onClick={onClick} className="calculator-button">
+    {label}
+  </button>
+);
+
+export const CalculatorDisplay: React.FC<{ value: string }> = ({ value }) => (
+  <div className="calculator-display">
+    {value}
+  </div>
+);
+
+const isValidExpression = (expression: string): boolean => {
+  // Validate expression to prevent invalid sequences, allowing spaces
+  return /^-?\d+(\.\d+)?([+\-*/]\s*-?\d+(\.\d+)?)*$/.test(expression.trim());
+};
+
+const performOperation = (expression: string): number => {
+  if (!isValidExpression(expression)) {
+    throw new Error('Invalid expression');
+  }
+  const result = math.evaluate(expression);
+  if (typeof result !== 'number' || !Number.isFinite(result)) {
+    throw new Error('Division by zero or invalid result');
+  }
+  return result;
+};
 
 const Calculator: React.FC = () => {
   const [displayValue, setDisplayValue] = useState('0');
 
   const handleButtonClick = (label: string) => {
-    if (label === 'C') {
-      setDisplayValue('0');
-    } else if (label === '=') {
-      try {
-        // Improved regex to handle negative numbers, spaces, multiple operators, and parentheses
-        if (/^[-+]?\d+(\.\d+)?([\s]*[+\-*/][\s]*[-+]?\d+(\.\d+)?|\([\s]*[-+]?\d+(\.\d+)?[\s]*\))*$/.test(displayValue)) {
-          const result = evaluate(displayValue);
-          setDisplayValue(String(result));
-        } else {
-          setDisplayValue('Error');
-        }
-      } catch (error) {
-        console.error('Evaluation error:', error);
-        setDisplayValue('Error');
+    setDisplayValue((prev) => {
+      if (prev === 'Error' && !isNaN(Number(label))) {
+        return label;
       }
-    } else {
-      setDisplayValue((prev) => (prev === '0' ? label : prev + label));
-    }
+      if (label === 'C') {
+        return '0';
+      } else if (label === '=') {
+        try {
+          const result = performOperation(prev);
+          return String(result);
+        } catch (error) {
+          console.error('Evaluation error:', error);
+          return 'Error';
+        }
+      } else {
+        if (prev === '0' && label !== '.') {
+          return label;
+        }
+        if (label === '.' && prev.includes('.')) {
+          return prev;
+        }
+        if (/[-+*/]$/.test(prev) && /[-+*/]/.test(label)) {
+          return prev.slice(0, -1) + label;
+        }
+        return prev + label;
+      }
+    });
   };
 
   return (
@@ -42,3 +77,4 @@ const Calculator: React.FC = () => {
 };
 
 export default Calculator;
+export { CalculatorButton, CalculatorDisplay };
